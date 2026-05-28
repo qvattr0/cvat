@@ -80,3 +80,6 @@ cvat-ui/dist
 **/!.yarn/releases
 **/!.yarn/sdks
 **/!.yarn/versions
+
+# Ignore all utility files
+taskfile.yml
