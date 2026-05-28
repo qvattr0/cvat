@@ -34,6 +34,9 @@ yarn-error.log*
 /tests/cypress/screenshots
 .idea/
 
+# Ignore Cursor editor files
+.cursor/
+
 #Ignore helm-related files
 /helm-chart/Chart.lock
 /helm-chart/values.*.yaml

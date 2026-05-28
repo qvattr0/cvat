@@ -7,7 +7,7 @@ import _ from 'lodash';
 import { AnyAction } from 'redux';
 import { ThunkAction } from 'utils/redux';
 import {
-    GridColor, ColorBy, SettingsState, ToolsBlockerState,
+    GridColor, ColorBy, SettingsState, SettingsTab, ToolsBlockerState,
     CombinedState,
 } from 'reducers';
 import { OrientationVisibility } from 'cvat-canvas3d-wrapper';
@@ -53,6 +53,7 @@ export enum SettingsActionTypes {
     SWITCH_SHOWING_OBJECTS_TEXT_ALWAYS = 'SWITCH_SHOWING_OBJECTS_TEXT_ALWAYS',
     CHANGE_CANVAS_BACKGROUND_COLOR = 'CHANGE_CANVAS_BACKGROUND_COLOR',
     SWITCH_SETTINGS_DIALOG = 'SWITCH_SETTINGS_DIALOG',
+    SWITCH_SETTINGS_TAB = 'SWITCH_SETTINGS_TAB',
     SET_SETTINGS = 'SET_SETTINGS',
     SWITCH_TOOLS_BLOCKER_STATE = 'SWITCH_TOOLS_BLOCKER_STATE',
     SWITCH_SHOWING_DELETED_FRAMES = 'SWITCH_SHOWING_DELETED_FRAMES',
@@ -374,6 +375,20 @@ export function switchSettingsModalVisible(visible: boolean): AnyAction {
     return {
         type: SettingsActionTypes.SWITCH_SETTINGS_DIALOG,
         payload: { visible },
+    };
+}
+
+export function switchSettingsTab(tab: SettingsTab): AnyAction {
+    return {
+        type: SettingsActionTypes.SWITCH_SETTINGS_TAB,
+        payload: { tab },
+    };
+}
+
+export function openSettingsModalOnTab(tab: SettingsTab): ThunkAction {
+    return async (dispatch): Promise<void> => {
+        dispatch(switchSettingsTab(tab));
+        dispatch(switchSettingsModalVisible(true));
     };
 }
 

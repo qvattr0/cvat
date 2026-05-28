@@ -34,6 +34,22 @@ for (const index of [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]) {
     };
 }
 
+componentShortcuts.SWITCH_NEXT_LABEL = {
+    name: 'Next label',
+    description:
+        'Cycle to the next label in the job\'s label list (changes the activated object\'s label or the default label for the next drawn object)',
+    sequences: [']'],
+    scope: ShortcutScope.OBJECTS_SIDEBAR,
+};
+
+componentShortcuts.SWITCH_PREVIOUS_LABEL = {
+    name: 'Previous label',
+    description:
+        'Cycle to the previous label in the job\'s label list (changes the activated object\'s label or the default label for the next drawn object)',
+    sequences: ['['],
+    scope: ShortcutScope.OBJECTS_SIDEBAR,
+};
+
 registerComponentShortcuts(componentShortcuts);
 
 function LabelsListComponent(): JSX.Element {
@@ -71,45 +87,83 @@ function LabelsListComponent(): JSX.Element {
         registerComponentShortcuts(updatedComponentShortcuts);
     }, [labels]);
 
+    const applyLabel = (label: any): boolean => {
+        const labelID = label.id as number;
+        const relevantAppState = getCVATStore().getState();
+        const { states, activatedStateID } = relevantAppState.annotation.annotations;
+        const { activeShapeType, activeObjectType } = relevantAppState.annotation.drawing;
+
+        if (Number.isInteger(activatedStateID)) {
+            const activatedState = states.filter((state: any) => state.clientID === activatedStateID)[0];
+            const bothAreTags = activatedState.objectType === ObjectType.TAG && label.type === LabelType.TAG;
+            const labelIsApplicable = label.type === LabelType.ANY ||
+                (activatedState.shapeType === label.type && activatedState.shapeType !== ShapeType.SKELETON) ||
+                bothAreTags;
+            if (activatedState && labelIsApplicable) {
+                activatedState.label = label;
+                dispatch(updateAnnotationsAsync([activatedState]));
+                return true;
+            }
+            return false;
+        }
+
+        if (label.type === LabelType.TAG) {
+            dispatch(rememberObject({ activeLabelID: labelID, activeObjectType: ObjectType.TAG }, false));
+        } else if (label.type === LabelType.MASK) {
+            dispatch(rememberObject({
+                activeLabelID: labelID,
+                activeObjectType: ObjectType.SHAPE,
+                activeShapeType: ShapeType.MASK,
+            }, false));
+        } else {
+            dispatch(rememberObject({
+                activeLabelID: labelID,
+                activeObjectType: activeObjectType !== ObjectType.TAG ? activeObjectType : ObjectType.SHAPE,
+                activeShapeType: label.type === LabelType.ANY && activeShapeType !== ShapeType.SKELETON ?
+                    activeShapeType : label.type as unknown as ShapeType,
+            }, false));
+        }
+
+        message.destroy();
+        message.success(`Default label has been changed to "${label.name}"`);
+        return true;
+    };
+
     const handleHelper = (event: KeyboardEvent, index: number): void => {
         if (event) event.preventDefault();
         const labelID = keyToLabelMapping[index];
-        const label = labels.find((_label: any) => _label.id === labelID)!;
+        const label = labels.find((_label: any) => _label.id === labelID);
         if (Number.isInteger(labelID) && label) {
-            const relevantAppState = getCVATStore().getState();
-            const { states, activatedStateID } = relevantAppState.annotation.annotations;
-            const { activeShapeType, activeObjectType } = relevantAppState.annotation.drawing;
+            applyLabel(label);
+        }
+    };
 
-            if (Number.isInteger(activatedStateID)) {
-                const activatedState = states.filter((state: any) => state.clientID === activatedStateID)[0];
-                const bothAreTags = activatedState.objectType === ObjectType.TAG && label.type === LabelType.TAG;
-                const labelIsApplicable = label.type === LabelType.ANY ||
-                    (activatedState.shapeType === label.type && activatedState.shapeType !== ShapeType.SKELETON) ||
-                    bothAreTags;
-                if (activatedState && labelIsApplicable) {
-                    activatedState.label = label;
-                    dispatch(updateAnnotationsAsync([activatedState]));
-                }
-            } else {
-                if (label.type === LabelType.TAG) {
-                    dispatch(rememberObject({ activeLabelID: labelID, activeObjectType: ObjectType.TAG }, false));
-                } else if (label.type === LabelType.MASK) {
-                    dispatch(rememberObject({
-                        activeLabelID: labelID,
-                        activeObjectType: ObjectType.SHAPE,
-                        activeShapeType: ShapeType.MASK,
-                    }, false));
-                } else {
-                    dispatch(rememberObject({
-                        activeLabelID: labelID,
-                        activeObjectType: activeObjectType !== ObjectType.TAG ? activeObjectType : ObjectType.SHAPE,
-                        activeShapeType: label.type === LabelType.ANY && activeShapeType !== ShapeType.SKELETON ?
-                            activeShapeType : label.type as unknown as ShapeType,
-                    }, false));
-                }
+    const cycleLabel = (event: KeyboardEvent, step: 1 | -1): void => {
+        if (event) event.preventDefault();
+        if (!labels.length) return;
 
-                message.destroy();
-                message.success(`Default label has been changed to "${label.name}"`);
+        const relevantAppState = getCVATStore().getState();
+        const { states, activatedStateID } = relevantAppState.annotation.annotations;
+        const { activeLabelID } = relevantAppState.annotation.drawing;
+
+        let currentLabelID: number | null = activeLabelID;
+        if (Number.isInteger(activatedStateID)) {
+            const activatedState = states.find((state: any) => state.clientID === activatedStateID);
+            if (activatedState?.label?.id !== undefined) {
+                currentLabelID = activatedState.label.id;
+            }
+        }
+
+        const currentIndex = labels.findIndex((label: any) => label.id === currentLabelID);
+        const startIndex = currentIndex === -1 ? (step === 1 ? -1 : 0) : currentIndex;
+
+        // try every other label exactly once, wrapping around, and skip labels that are
+        // not applicable to the currently activated object so the user always advances
+        for (let i = 1; i <= labels.length; i++) {
+            const nextIndex = ((startIndex + step * i) % labels.length + labels.length) % labels.length;
+            const candidate = labels[nextIndex];
+            if (candidate && candidate.id !== currentLabelID && applyLabel(candidate)) {
+                return;
             }
         }
     };
@@ -121,6 +175,9 @@ function LabelsListComponent(): JSX.Element {
             handleHelper(event, index);
         };
     }
+
+    handlers.SWITCH_NEXT_LABEL = (event: KeyboardEvent) => cycleLabel(event, 1);
+    handlers.SWITCH_PREVIOUS_LABEL = (event: KeyboardEvent) => cycleLabel(event, -1);
 
     return (
         <div className='cvat-objects-sidebar-labels-list'>

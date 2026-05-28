@@ -14,11 +14,13 @@ import Button from 'antd/lib/button';
 import notification from 'antd/lib/notification';
 import { PlayCircleOutlined, LaptopOutlined, BuildOutlined } from '@ant-design/icons';
 
-import { restoreSettingsAsync, updateCachedSettings } from 'actions/settings-actions';
+import {
+    restoreSettingsAsync, switchSettingsTab, updateCachedSettings,
+} from 'actions/settings-actions';
 import WorkspaceSettingsContainer from 'containers/header/settings-modal/workspace-settings';
 import PlayerSettingsContainer from 'containers/header/settings-modal/player-settings';
 import ShortcutsSettingsContainer from 'containers/header/settings-modal/shortcuts-settings';
-import { CombinedState } from 'reducers';
+import { CombinedState, SettingsTab } from 'reducers';
 
 interface SettingsModalProps {
     visible: boolean;
@@ -28,9 +30,10 @@ interface SettingsModalProps {
 function SettingsModal(props: SettingsModalProps): JSX.Element {
     const { visible, onClose } = props;
 
-    const { settings, shortcuts } = useSelector((state: CombinedState) => ({
+    const { settings, shortcuts, activeTab } = useSelector((state: CombinedState) => ({
         settings: state.settings,
         shortcuts: state.shortcuts,
+        activeTab: state.settings.activeTab,
     }), shallowEqual);
     const [settingsInitialized, setSettingsInitialized] = useState(false);
     const dispatch = useDispatch();
@@ -89,7 +92,12 @@ function SettingsModal(props: SettingsModalProps): JSX.Element {
             )}
         >
             <div className='cvat-settings-tabs'>
-                <Tabs defaultActiveKey='player' type='card' items={tabItems} />
+                <Tabs
+                    activeKey={activeTab}
+                    onChange={(key: string) => dispatch(switchSettingsTab(key as SettingsTab))}
+                    type='card'
+                    items={tabItems}
+                />
             </div>
         </Modal>
     );

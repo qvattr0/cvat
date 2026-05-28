@@ -1031,12 +1031,15 @@ export interface ShapesSettingsState {
     orientationVisibility: OrientationVisibility;
 }
 
+export type SettingsTab = 'player' | 'workspace' | 'shortcuts';
+
 export interface SettingsState {
     shapes: ShapesSettingsState;
     workspace: WorkspaceSettingsState;
     player: PlayerSettingsState;
     imageFilters: ImageFilter[];
     showDialog: boolean;
+    activeTab: SettingsTab;
 }
 
 export interface ShortcutsState {

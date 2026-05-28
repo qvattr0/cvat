@@ -67,6 +67,7 @@ const defaultState: SettingsState = {
     },
     imageFilters: [],
     showDialog: false,
+    activeTab: 'player',
 };
 
 export default (state = defaultState, action: AnyAction): SettingsState => {
@@ -404,6 +405,12 @@ export default (state = defaultState, action: AnyAction): SettingsState => {
             return {
                 ...state,
                 showDialog: action.payload.visible,
+            };
+        }
+        case SettingsActionTypes.SWITCH_SETTINGS_TAB: {
+            return {
+                ...state,
+                activeTab: action.payload.tab,
             };
         }
         case SettingsActionTypes.SET_SETTINGS: {

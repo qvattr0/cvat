@@ -34,7 +34,10 @@ import config from 'config';
 import { Organization } from 'cvat-core-wrapper';
 import CVATTooltip from 'components/common/cvat-tooltip';
 import CVATLogo from 'components/common/cvat-logo';
-import { switchSettingsModalVisible as switchSettingsModalVisibleAction } from 'actions/settings-actions';
+import {
+    switchSettingsModalVisible as switchSettingsModalVisibleAction,
+    openSettingsModalOnTab as openSettingsModalOnTabAction,
+} from 'actions/settings-actions';
 import { logoutAsync } from 'actions/auth-actions';
 import { shortcutsActions, registerComponentShortcuts } from 'actions/shortcuts-actions';
 import { getOrganizationsAsync, organizationActions } from 'actions/organization-actions';
@@ -67,6 +70,7 @@ interface DispatchToProps {
     onLogout: () => void;
     switchSettingsModalVisible: (visible: boolean) => void;
     switchShortcutsModalVisible: (visible: boolean) => void;
+    openShortcutsSettings: () => void;
     fetchOrganizations: () => void;
     openSelectOrganizationModal: (onSelectOrgCallback: (org: Organization | null) => void) => void;
 }
@@ -82,6 +86,12 @@ const componentShortcuts = {
         name: 'Show settings',
         description: 'Open/hide settings dialog',
         sequences: ['f2'],
+        scope: ShortcutScope.GENERAL,
+    },
+    OPEN_SHORTCUT_SETTINGS: {
+        name: 'Open shortcut settings',
+        description: 'Open the settings dialog directly on the Shortcuts tab',
+        sequences: ['f3'],
         scope: ShortcutScope.GENERAL,
     },
 };
@@ -139,6 +149,9 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         switchSettingsModalVisible: (visible: boolean): void => dispatch(
             switchSettingsModalVisibleAction(visible),
         ),
+        openShortcutsSettings: (): void => dispatch(
+            openSettingsModalOnTabAction('shortcuts'),
+        ),
         fetchOrganizations: (): void => dispatch(
             getOrganizationsAsync({}),
         ),
@@ -170,6 +183,7 @@ function HeaderComponent(props: Props): JSX.Element {
         organizationsListPage,
         switchSettingsModalVisible,
         switchShortcutsModalVisible,
+        openShortcutsSettings,
         fetchOrganizations,
         openSelectOrganizationModal,
     } = props;
@@ -200,6 +214,12 @@ function HeaderComponent(props: Props): JSX.Element {
             if (event) event.preventDefault();
             if (!shortcutsModalVisible) {
                 switchSettingsModalVisible(!settingsModalVisible);
+            }
+        },
+        OPEN_SHORTCUT_SETTINGS: (event: KeyboardEvent | undefined) => {
+            if (event) event.preventDefault();
+            if (!shortcutsModalVisible) {
+                openShortcutsSettings();
             }
         },
     };

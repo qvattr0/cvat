@@ -79,7 +79,7 @@ Mousetrap.prototype.stopCallback = function (e: KeyboardEvent, element: Element,
     ).some((el) => (el as HTMLElement).style.display !== 'none');
 
     if (anyModalsOpened) {
-        const modalClosingSequences = ['SWITCH_SHORTCUTS', 'SWITCH_SETTINGS']
+        const modalClosingSequences = ['SWITCH_SHORTCUTS', 'SWITCH_SETTINGS', 'OPEN_SHORTCUT_SETTINGS']
             .map((key) => [...(applicationKeyMap[key]?.sequences ?? [])]).flat();
 
         return !modalClosingSequences.some((seq) => {
