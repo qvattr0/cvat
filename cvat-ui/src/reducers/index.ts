@@ -1010,6 +1010,7 @@ export interface WorkspaceSettingsState {
     showObjectsTextAlways: boolean;
     showAllInterpolationTracks: boolean;
     intelligentPolygonCrop: boolean;
+    cycleLabelsOnDraw: boolean;
     defaultApproxPolyAccuracy: number;
     toolsBlockerState: ToolsBlockerState;
     textFontSize: number;

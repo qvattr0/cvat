@@ -38,6 +38,7 @@ const defaultState: SettingsState = {
         showObjectsTextAlways: false,
         showAllInterpolationTracks: false,
         intelligentPolygonCrop: true,
+        cycleLabelsOnDraw: false,
         defaultApproxPolyAccuracy: 9,
         textFontSize: 14,
         controlPointsSize: 5,
@@ -371,6 +372,15 @@ export default (state = defaultState, action: AnyAction): SettingsState => {
                 workspace: {
                     ...state.workspace,
                     intelligentPolygonCrop: action.payload.intelligentPolygonCrop,
+                },
+            };
+        }
+        case SettingsActionTypes.SWITCH_CYCLE_LABELS_ON_DRAW: {
+            return {
+                ...state,
+                workspace: {
+                    ...state.workspace,
+                    cycleLabelsOnDraw: action.payload.cycleLabelsOnDraw,
                 },
             };
         }

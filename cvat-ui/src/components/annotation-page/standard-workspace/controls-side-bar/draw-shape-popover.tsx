@@ -9,6 +9,7 @@ import Button from 'antd/lib/button';
 import InputNumber from 'antd/lib/input-number';
 import Radio, { RadioChangeEvent } from 'antd/lib/radio';
 import Switch from 'antd/lib/switch';
+import Checkbox, { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import Text from 'antd/lib/typography/Text';
 import { RectDrawingMethod, CuboidDrawingMethod } from 'cvat-canvas-wrapper';
 
@@ -27,11 +28,13 @@ interface Props {
     selectedLabelID: number | null;
     repeatShapeShortcut: string;
     simplifyPoly?: boolean;
+    cycleLabels: boolean;
     onChangeLabel(value: Label | null): void;
     onChangePoints(value: number | undefined): void;
     onChangeRectDrawingMethod(event: RadioChangeEvent): void;
     onChangeCuboidDrawingMethod(event: RadioChangeEvent): void;
     onChangeSimplifyPoly?(value: boolean): void;
+    onChangeCycleLabels(value: boolean): void;
     onDrawTrack(): void;
     onDrawShape(): void;
     jobInstance: any;
@@ -48,6 +51,7 @@ function DrawShapePopoverComponent(props: Props): JSX.Element {
         cuboidDrawingMethod,
         repeatShapeShortcut,
         simplifyPoly,
+        cycleLabels,
         onDrawTrack,
         onDrawShape,
         onChangeLabel,
@@ -55,6 +59,7 @@ function DrawShapePopoverComponent(props: Props): JSX.Element {
         onChangeRectDrawingMethod,
         onChangeCuboidDrawingMethod,
         onChangeSimplifyPoly,
+        onChangeCycleLabels,
         jobInstance,
     } = props;
 
@@ -86,6 +91,23 @@ function DrawShapePopoverComponent(props: Props): JSX.Element {
                     />
                 </Col>
             </Row>
+            {labels.length > 1 && (
+                <Row justify='start'>
+                    <Col>
+                        <CVATTooltip title='Automatically switch to the next label after drawing each object'>
+                            <Checkbox
+                                className='cvat-draw-shape-cycle-labels-checkbox'
+                                checked={cycleLabels}
+                                onChange={(event: CheckboxChangeEvent) => {
+                                    onChangeCycleLabels(event.target.checked);
+                                }}
+                            >
+                                Cycle labels
+                            </Checkbox>
+                        </CVATTooltip>
+                    </Col>
+                </Row>
+            )}
             {is2D && shapeType === ShapeType.RECTANGLE && (
                 <>
                     <Row>

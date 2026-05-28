@@ -11,6 +11,7 @@ import Spin from 'antd/lib/spin';
 import Popover from 'antd/lib/popover';
 import Icon, { UpOutlined } from '@ant-design/icons';
 import notification from 'antd/lib/notification';
+import message from 'antd/lib/message';
 import debounce from 'lodash/debounce';
 
 import GlobalHotKeys, { KeyMap } from 'utils/mousetrap-react';
@@ -49,6 +50,7 @@ import {
     updateEditedStateAsync,
     collapseObjectItems,
     collapseSidebar,
+    changeDefaultLabel,
     AnnotationSource,
 } from 'actions/annotation-actions';
 import {
@@ -118,6 +120,7 @@ interface StateToProps {
     snapToPoint: boolean;
     adaptiveZoom: boolean;
     intelligentPolygonCrop: boolean;
+    cycleLabelsOnDraw: boolean;
     switchableAutomaticBordering: boolean;
     keyMap: KeyMap;
     showTagsOnFrame: boolean;
@@ -156,6 +159,7 @@ interface DispatchToProps {
     onCanvasErrorOccurred(error: Error): void;
     onStartIssue(position: number[]): void;
     onUpdateEditedObject(editedState: ObjectState | null): void;
+    onChangeDefaultLabel(labelID: number): void;
 }
 
 function mapStateToProps(state: CombinedState): StateToProps {
@@ -203,6 +207,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
                 snapToPoint,
                 adaptiveZoom,
                 intelligentPolygonCrop,
+                cycleLabelsOnDraw,
                 textFontSize,
                 controlPointsSize,
                 textPosition,
@@ -261,6 +266,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
         snapToPoint,
         adaptiveZoom,
         intelligentPolygonCrop,
+        cycleLabelsOnDraw,
         workspace,
         keyMap,
         activeControl,
@@ -396,6 +402,9 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         },
         onUpdateEditedObject(editedState: ObjectState | null): void {
             dispatch(updateEditedStateAsync(editedState));
+        },
+        onChangeDefaultLabel(labelID: number): void {
+            dispatch(changeDefaultLabel(labelID));
         },
     };
 }
@@ -698,6 +707,7 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
         const {
             jobInstance, activeLabelID, activeObjectType, frame, updateActiveControl, onCreateAnnotations,
             onUpdateEditedObject, activeObjectHidden, workspace, curZLayer,
+            cycleLabelsOnDraw, onChangeDefaultLabel,
         } = this.props;
 
         if (!event.detail.continue) {
@@ -740,6 +750,22 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
 
         onCreateAnnotations([objectState], source);
         onUpdateEditedObject(null);
+
+        if (cycleLabelsOnDraw && isDrawnFromScratch) {
+            const applicableLabels = jobInstance.labels.filter((label: any) => (
+                state.shapeType === ShapeType.SKELETON ?
+                    label.type === 'skeleton' :
+                    ['any', state.shapeType].includes(label.type as string)
+            ));
+
+            if (applicableLabels.length > 1) {
+                const currentIndex = applicableLabels.findIndex((label: any) => label.id === activeLabelID);
+                const nextLabel = applicableLabels[(currentIndex + 1) % applicableLabels.length];
+                onChangeDefaultLabel(nextLabel.id);
+                message.destroy();
+                message.success(`Next object set to "${nextLabel.name}"`);
+            }
+        }
     };
 
     private onCanvasObjectsMerged = (event: any): void => {

@@ -9,6 +9,7 @@ import { RadioChangeEvent } from 'antd/lib/radio';
 
 import { CombinedState } from 'reducers';
 import { rememberObject } from 'actions/annotation-actions';
+import { switchCycleLabelsOnDraw } from 'actions/settings-actions';
 import { Canvas, RectDrawingMethod, CuboidDrawingMethod } from 'cvat-canvas-wrapper';
 import { Canvas3d } from 'cvat-canvas3d-wrapper';
 import DrawShapePopoverComponent from 'components/annotation-page/standard-workspace/controls-side-bar/draw-shape-popover';
@@ -30,6 +31,7 @@ interface DispatchToProps {
         cuboidDrawingMethod?: CuboidDrawingMethod,
         simplifyPoly?: boolean,
     ): void;
+    onChangeCycleLabels(value: boolean): void;
 }
 
 interface StateToProps {
@@ -38,6 +40,7 @@ interface StateToProps {
     shapeType: ShapeType;
     labels: any[];
     jobInstance: any;
+    cycleLabels: boolean;
 }
 
 function mapDispatchToProps(dispatch: any): DispatchToProps {
@@ -63,6 +66,9 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
                 }),
             );
         },
+        onChangeCycleLabels(value: boolean): void {
+            dispatch(switchCycleLabelsOnDraw(value));
+        },
     };
 }
 
@@ -73,6 +79,7 @@ function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
             job: { labels, instance: jobInstance },
         },
         shortcuts: { normalizedKeyMap },
+        settings: { workspace: { cycleLabelsOnDraw } },
     } = state;
 
     return {
@@ -81,6 +88,7 @@ function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
         labels,
         normalizedKeyMap,
         jobInstance,
+        cycleLabels: cycleLabelsOnDraw,
     };
 }
 
@@ -215,7 +223,9 @@ class DrawShapePopoverContainer extends React.PureComponent<Props, State> {
 
     public render(): JSX.Element {
         const { satisfiedLabels } = this;
-        const { normalizedKeyMap, shapeType, jobInstance } = this.props;
+        const {
+            normalizedKeyMap, shapeType, jobInstance, cycleLabels, onChangeCycleLabels,
+        } = this.props;
         const {
             rectDrawingMethod, cuboidDrawingMethod, selectedLabelID, numberOfPoints, simplifyPoly,
         } = this.state;
@@ -231,12 +241,14 @@ class DrawShapePopoverContainer extends React.PureComponent<Props, State> {
                 rectDrawingMethod={rectDrawingMethod}
                 cuboidDrawingMethod={cuboidDrawingMethod}
                 simplifyPoly={simplifyPoly}
+                cycleLabels={cycleLabels}
                 repeatShapeShortcut={normalizedKeyMap.SWITCH_DRAW_MODE_STANDARD_CONTROLS}
                 onChangeLabel={this.onChangeLabel}
                 onChangePoints={this.onChangePoints}
                 onChangeRectDrawingMethod={this.onChangeRectDrawingMethod}
                 onChangeCuboidDrawingMethod={this.onChangeCuboidDrawingMethod}
                 onChangeSimplifyPoly={this.onChangeSimplifyPoly}
+                onChangeCycleLabels={onChangeCycleLabels}
                 onDrawTrack={this.onDrawTrack}
                 onDrawShape={this.onDrawShape}
             />

@@ -49,6 +49,7 @@ export enum SettingsActionTypes {
     SWITCH_SNAP_TO_POINT = 'SWITCH_SNAP_TO_POINT',
     SWITCH_ADAPTIVE_ZOOM = 'SWITCH_ADAPTIVE_ZOOM',
     SWITCH_INTELLIGENT_POLYGON_CROP = 'SWITCH_INTELLIGENT_POLYGON_CROP',
+    SWITCH_CYCLE_LABELS_ON_DRAW = 'SWITCH_CYCLE_LABELS_ON_DRAW',
     SWITCH_SHOWNIG_INTERPOLATED_TRACKS = 'SWITCH_SHOWNIG_INTERPOLATED_TRACKS',
     SWITCH_SHOWING_OBJECTS_TEXT_ALWAYS = 'SWITCH_SHOWING_OBJECTS_TEXT_ALWAYS',
     CHANGE_CANVAS_BACKGROUND_COLOR = 'CHANGE_CANVAS_BACKGROUND_COLOR',
@@ -358,6 +359,15 @@ export function switchIntelligentPolygonCrop(intelligentPolygonCrop: boolean): A
         type: SettingsActionTypes.SWITCH_INTELLIGENT_POLYGON_CROP,
         payload: {
             intelligentPolygonCrop,
+        },
+    };
+}
+
+export function switchCycleLabelsOnDraw(cycleLabelsOnDraw: boolean): AnyAction {
+    return {
+        type: SettingsActionTypes.SWITCH_CYCLE_LABELS_ON_DRAW,
+        payload: {
+            cycleLabelsOnDraw,
         },
     };
 }

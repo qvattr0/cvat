@@ -600,6 +600,17 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 },
             };
         }
+        case AnnotationActionTypes.CHANGE_DEFAULT_LABEL: {
+            const { labelID } = action.payload;
+
+            return {
+                ...state,
+                drawing: {
+                    ...state.drawing,
+                    activeLabelID: labelID,
+                },
+            };
+        }
         case AnnotationActionTypes.REPEAT_DRAW_SHAPE: {
             const { activeControl } = action.payload;
 

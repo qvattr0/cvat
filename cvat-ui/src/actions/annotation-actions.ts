@@ -103,6 +103,7 @@ export enum AnnotationActionTypes {
     REPEAT_DRAW_SHAPE = 'REPEAT_DRAW_SHAPE',
     RESET_CANVAS = 'RESET_CANVAS',
     REMEMBER_OBJECT = 'REMEMBER_OBJECT',
+    CHANGE_DEFAULT_LABEL = 'CHANGE_DEFAULT_LABEL',
     UPDATE_ANNOTATIONS_SUCCESS = 'UPDATE_ANNOTATIONS_SUCCESS',
     UPDATE_ANNOTATIONS_FAILED = 'UPDATE_ANNOTATIONS_FAILED',
     CREATE_ANNOTATIONS_FAILED = 'CREATE_ANNOTATIONS_FAILED',
@@ -1159,6 +1160,13 @@ export function rememberObject(createParams: {
     return {
         type: AnnotationActionTypes.REMEMBER_OBJECT,
         payload: { ...createParams, updateCurrentControl },
+    };
+}
+
+export function changeDefaultLabel(labelID: number): AnyAction {
+    return {
+        type: AnnotationActionTypes.CHANGE_DEFAULT_LABEL,
+        payload: { labelID },
     };
 }
 
